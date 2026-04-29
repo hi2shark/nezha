@@ -59,7 +59,7 @@ func InitConfigFromPath(path string) {
 // InitDBFromPath 从给出的文件路径中加载数据库
 func InitDBFromPath(path string) {
 	var err error
-	DB, err = gorm.Open(sqlite.Open(path), &gorm.Config{
+	DB, err = gorm.Open(sqlite.Open(path+"?_journal_mode=WAL"), &gorm.Config{
 		CreateBatchSize: 200,
 	})
 	if err != nil {
