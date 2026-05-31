@@ -44,8 +44,8 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
 			Scopes:       []string{},
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  "https://gitee.com/oauth/authorize",
-				TokenURL: "https://gitee.com/oauth/token",
+				AuthURL:  "https://gitee.com/oauth/authorize", // #nosec G101 -- public OAuth2 endpoint URL
+				TokenURL: "https://gitee.com/oauth/token",     // #nosec G101 -- public OAuth2 endpoint URL
 			},
 			RedirectURL: oa.getRedirectURL(c),
 		}
@@ -63,8 +63,8 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
 			Scopes:       []string{"read_user", "read_api"},
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  "https://jihulab.com/oauth/authorize",
-				TokenURL: "https://jihulab.com/oauth/token",
+				AuthURL:  "https://jihulab.com/oauth/authorize", // #nosec G101 -- public OAuth2 endpoint URL
+				TokenURL: "https://jihulab.com/oauth/token",     // #nosec G101 -- public OAuth2 endpoint URL
 			},
 			RedirectURL: oa.getRedirectURL(c),
 		}

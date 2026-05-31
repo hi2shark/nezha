@@ -152,7 +152,7 @@ func checkStatus() {
 			max, passed := alert.Check(alertsStore[alert.ID][server.ID])
 			// 保存当前服务器状态信息
 			curServer := model.Server{}
-			copier.Copy(&curServer, server)
+			_ = copier.Copy(&curServer, server)
 
 			// 本次未通过检查
 			if !passed {

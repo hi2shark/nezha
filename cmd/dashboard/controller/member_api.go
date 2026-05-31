@@ -637,7 +637,7 @@ func (ma *memberAPI) batchUpdateServerGroup(c *gin.Context) {
 	for i := 0; i < len(req.Servers); i++ {
 		serverId := req.Servers[i]
 		var s model.Server
-		copier.Copy(&s, singleton.ServerList[serverId])
+		_ = copier.Copy(&s, singleton.ServerList[serverId])
 		s.Tag = req.Group
 		// 如果修改了Ta
 		oldTag := singleton.ServerList[serverId].Tag

@@ -93,8 +93,8 @@ func RecordTransferHourlyUsage() {
 		if tx.In == 0 && tx.Out == 0 {
 			continue
 		}
-		server.PrevTransferInSnapshot = int64(server.State.NetInTransfer)
-		server.PrevTransferOutSnapshot = int64(server.State.NetOutTransfer)
+		server.PrevTransferInSnapshot = int64(server.State.NetInTransfer) // #nosec G115 -- network transfer fits in int64
+		server.PrevTransferOutSnapshot = int64(server.State.NetOutTransfer) // #nosec G115 -- network transfer fits in int64
 		tx.CreatedAt = nowTrimSeconds
 		txs = append(txs, tx)
 	}

@@ -53,7 +53,7 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 			defer singleton.ServerLock.RUnlock()
 			// 保存当前服务器状态信息
 			curServer := model.Server{}
-			copier.Copy(&curServer, singleton.ServerList[clientID])
+			_ = copier.Copy(&curServer, singleton.ServerList[clientID])
 			if cr.PushSuccessful && r.GetSuccessful() {
 				singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.MustLocalize(
 					&i18n.LocalizeConfig{
@@ -69,7 +69,7 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 				), cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
 			}
 			singleton.DB.Model(cr).Updates(model.Cron{
-				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
+				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())), // #nosec G115 -- delay is seconds, safely within range
 				LastResult:     r.GetSuccessful(),
 			})
 		}
@@ -116,8 +116,8 @@ func (s *NezhaHandler) ReportSystemState(c context.Context, r *pb.State) (*pb.Re
 
 	// 应对 dashboard 重启的情况，如果从未记录过，先打点，等到小时时间点时入库
 	if singleton.ServerList[clientID].PrevTransferInSnapshot == 0 || singleton.ServerList[clientID].PrevTransferOutSnapshot == 0 {
-		singleton.ServerList[clientID].PrevTransferInSnapshot = int64(state.NetInTransfer)
-		singleton.ServerList[clientID].PrevTransferOutSnapshot = int64(state.NetOutTransfer)
+		singleton.ServerList[clientID].PrevTransferInSnapshot = int64(state.NetInTransfer) // #nosec G115 -- network transfer fits in int64
+		singleton.ServerList[clientID].PrevTransferOutSnapshot = int64(state.NetOutTransfer) // #nosec G115 -- network transfer fits in int64
 	}
 
 	return &pb.Receipt{Proced: true}, nil
@@ -141,7 +141,7 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		if err == nil {
 			for _, provider := range providers {
 				go func(provider *ddns.Provider) {
-					provider.UpdateDomain(context.Background())
+					provider.UpdateDomain(c)
 				}(provider)
 			}
 		} else {
@@ -175,8 +175,8 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	 * 这是可以借助上报顺序的空档，将停机前的流量统计数据标记下来，加到下一个小时的数据点上
 	 */
 	if singleton.ServerList[clientID].Host != nil && singleton.ServerList[clientID].Host.BootTime < host.BootTime {
-		singleton.ServerList[clientID].PrevTransferInSnapshot = singleton.ServerList[clientID].PrevTransferInSnapshot - int64(singleton.ServerList[clientID].State.NetInTransfer)
-		singleton.ServerList[clientID].PrevTransferOutSnapshot = singleton.ServerList[clientID].PrevTransferOutSnapshot - int64(singleton.ServerList[clientID].State.NetOutTransfer)
+		singleton.ServerList[clientID].PrevTransferInSnapshot = singleton.ServerList[clientID].PrevTransferInSnapshot - int64(singleton.ServerList[clientID].State.NetInTransfer) // #nosec G115 -- network transfer fits in int64
+		singleton.ServerList[clientID].PrevTransferOutSnapshot = singleton.ServerList[clientID].PrevTransferOutSnapshot - int64(singleton.ServerList[clientID].State.NetOutTransfer) // #nosec G115 -- network transfer fits in int64
 	}
 
 	// 不要冲掉国家码

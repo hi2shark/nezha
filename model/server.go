@@ -73,5 +73,6 @@ func (s Server) MarshalForDashboard() template.JS {
 	secret, _ := utils.Json.Marshal(s.Secret)
 	ddnsProfilesRaw, _ := utils.Json.Marshal(s.DDNSProfilesRaw)
 	publicNote, _ := utils.Json.Marshal(s.PublicNote)
+	// #nosec G203 -- fields are JSON-encoded before interpolation, preventing XSS
 	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s,"EnableDDNS": %s,"DDNSProfilesRaw": %s,"PublicNote": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest), boolToString(s.EnableDDNS), ddnsProfilesRaw, publicNote))
 }

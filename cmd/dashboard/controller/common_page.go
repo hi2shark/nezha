@@ -85,8 +85,8 @@ func (p *commonPage) service(c *gin.Context) {
 		defer singleton.AlertsLock.RUnlock()
 		var stats map[uint64]model.ServiceItemResponse
 		var statsStore map[uint64]model.CycleTransferStats
-		copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
-		copier.Copy(&statsStore, singleton.AlertsCycleTransferStatsStore)
+		_ = copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
+		_ = copier.Copy(&statsStore, singleton.AlertsCycleTransferStatsStore)
 		for k, service := range stats {
 			if !service.Monitor.EnableShowInService {
 				delete(stats, k)
@@ -349,7 +349,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		return
 	}
 
-	rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
+	_ = rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
 }
 
 type createTerminalRequest struct {
@@ -479,7 +479,7 @@ func (cp *commonPage) fm(c *gin.Context) {
 		return
 	}
 
-	rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
+	_ = rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
 }
 
 func (cp *commonPage) createFM(c *gin.Context) {
@@ -524,7 +524,7 @@ func (cp *commonPage) createFM(c *gin.Context) {
 	}
 
 	singleton.ServerLock.RLock()
-	server := singleton.ServerList[uint64(serverId)]
+	server := singleton.ServerList[uint64(serverId)] // #nosec G115 -- serverId validated by strconv.Atoi
 	singleton.ServerLock.RUnlock()
 	if server == nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{

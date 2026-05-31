@@ -20,7 +20,7 @@ func ServeRPC(port uint) {
 	if err != nil {
 		panic(err)
 	}
-	server.Serve(listen)
+	_ = server.Serve(listen)
 }
 
 func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
@@ -49,17 +49,17 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
 				continue
 			}
 			if task.Cover == model.MonitorCoverIgnoreAll && task.SkipServers[singleton.SortedServerList[workedServerIndex].ID] {
-				singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
+				_ = singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
 				workedServerIndex++
 				continue
 			}
 			if task.Cover == model.MonitorCoverAll && !task.SkipServers[singleton.SortedServerList[workedServerIndex].ID] {
-				singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
+				_ = singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
 				workedServerIndex++
 				continue
 			}
 			// 找到合适机器执行任务，跳出循环
-			// singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
+			// _ = singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
 			// workedServerIndex++
 			// break
 		}
@@ -68,7 +68,7 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
 }
 
 func DispatchKeepalive() {
-	singleton.Cron.AddFunc("@every 60s", func() {
+	_, _ = singleton.Cron.AddFunc("@every 60s", func() {
 		singleton.SortedServerLock.RLock()
 		defer singleton.SortedServerLock.RUnlock()
 		for i := 0; i < len(singleton.SortedServerList); i++ {
@@ -76,7 +76,7 @@ func DispatchKeepalive() {
 				continue
 			}
 
-			singleton.SortedServerList[i].TaskStream.Send(&pb.Task{Type: model.TaskTypeKeepalive})
+			_ = singleton.SortedServerList[i].TaskStream.Send(&pb.Task{Type: model.TaskTypeKeepalive})
 		}
 	})
 }

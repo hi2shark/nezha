@@ -185,34 +185,36 @@ func (rule Rule) GetTransferDurationStart() time.Time {
 	unit := strings.ToLower(rule.CycleUnit)
 	startTime := *rule.CycleStart
 	var nextTime time.Time
+	cycleIntervalInt := int(rule.CycleInterval)   // #nosec G115 -- cycle interval is small positive integer
+	cycleIntervalInt64 := int64(rule.CycleInterval) // #nosec G115 -- cycle interval is small positive integer
 	switch unit {
 	case "year":
-		nextTime = startTime.AddDate(int(rule.CycleInterval), 0, 0)
+		nextTime = startTime.AddDate(cycleIntervalInt, 0, 0)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(int(rule.CycleInterval), 0, 0)
+			nextTime = nextTime.AddDate(cycleIntervalInt, 0, 0)
 		}
 	case "month":
-		nextTime = startTime.AddDate(0, int(rule.CycleInterval), 0)
+		nextTime = startTime.AddDate(0, cycleIntervalInt, 0)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, int(rule.CycleInterval), 0)
+			nextTime = nextTime.AddDate(0, cycleIntervalInt, 0)
 		}
 	case "week":
-		nextTime = startTime.AddDate(0, 0, 7*int(rule.CycleInterval))
+		nextTime = startTime.AddDate(0, 0, 7*cycleIntervalInt)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, 0, 7*int(rule.CycleInterval))
+			nextTime = nextTime.AddDate(0, 0, 7*cycleIntervalInt)
 		}
 	case "day":
-		nextTime = startTime.AddDate(0, 0, int(rule.CycleInterval))
+		nextTime = startTime.AddDate(0, 0, cycleIntervalInt)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, 0, int(rule.CycleInterval))
+			nextTime = nextTime.AddDate(0, 0, cycleIntervalInt)
 		}
 	default:
 		// For hour unit or not set.
-		interval := 3600 * int64(rule.CycleInterval)
+		interval := 3600 * cycleIntervalInt64
 		startTime = time.Unix(rule.CycleStart.Unix()+(time.Now().Unix()-rule.CycleStart.Unix())/interval*interval, 0)
 	}
 
@@ -225,34 +227,36 @@ func (rule Rule) GetTransferDurationEnd() time.Time {
 	unit := strings.ToLower(rule.CycleUnit)
 	startTime := *rule.CycleStart
 	var nextTime time.Time
+	cycleIntervalInt := int(rule.CycleInterval)   // #nosec G115 -- cycle interval is small positive integer
+	cycleIntervalInt64 := int64(rule.CycleInterval) // #nosec G115 -- cycle interval is small positive integer
 	switch unit {
 	case "year":
-		nextTime = startTime.AddDate(int(rule.CycleInterval), 0, 0)
+		nextTime = startTime.AddDate(cycleIntervalInt, 0, 0)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(int(rule.CycleInterval), 0, 0)
+			nextTime = nextTime.AddDate(cycleIntervalInt, 0, 0)
 		}
 	case "month":
-		nextTime = startTime.AddDate(0, int(rule.CycleInterval), 0)
+		nextTime = startTime.AddDate(0, cycleIntervalInt, 0)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, int(rule.CycleInterval), 0)
+			nextTime = nextTime.AddDate(0, cycleIntervalInt, 0)
 		}
 	case "week":
-		nextTime = startTime.AddDate(0, 0, 7*int(rule.CycleInterval))
+		nextTime = startTime.AddDate(0, 0, 7*cycleIntervalInt)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, 0, 7*int(rule.CycleInterval))
+			nextTime = nextTime.AddDate(0, 0, 7*cycleIntervalInt)
 		}
 	case "day":
-		nextTime = startTime.AddDate(0, 0, int(rule.CycleInterval))
+		nextTime = startTime.AddDate(0, 0, cycleIntervalInt)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, 0, int(rule.CycleInterval))
+			nextTime = nextTime.AddDate(0, 0, cycleIntervalInt)
 		}
 	default:
 		// For hour unit or not set.
-		interval := 3600 * int64(rule.CycleInterval)
+		interval := 3600 * cycleIntervalInt64
 		startTime = time.Unix(rule.CycleStart.Unix()+(time.Now().Unix()-rule.CycleStart.Unix())/interval*interval, 0)
 		nextTime = time.Unix(startTime.Unix()+interval, 0)
 	}

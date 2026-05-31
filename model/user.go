@@ -25,7 +25,7 @@ type User struct {
 
 func NewUserFromGitea(gu *gitea.User) User {
 	var u User
-	u.ID = uint64(gu.ID)
+	u.ID = uint64(gu.ID) // #nosec G115 -- external user ID, safely within uint64 range
 	u.Login = gu.UserName
 	u.AvatarURL = gu.AvatarURL
 	u.Name = gu.FullName
@@ -40,7 +40,7 @@ func NewUserFromGitea(gu *gitea.User) User {
 
 func NewUserFromGitlab(gu *gitlab.User) User {
 	var u User
-	u.ID = uint64(gu.ID)
+	u.ID = uint64(gu.ID) // #nosec G115 -- external user ID, safely within uint64 range
 	u.Login = gu.Username
 	u.AvatarURL = gu.AvatarURL
 	u.Name = gu.Name
@@ -55,7 +55,7 @@ func NewUserFromGitlab(gu *gitlab.User) User {
 
 func NewUserFromGitHub(gu *github.User) User {
 	var u User
-	u.ID = uint64(gu.GetID())
+	u.ID = uint64(gu.GetID()) // #nosec G115 -- external user ID, safely within uint64 range
 	u.Login = gu.GetLogin()
 	u.AvatarURL = gu.GetAvatarURL()
 	u.Name = gu.GetName()

@@ -79,7 +79,9 @@ func main() {
 		log.Println("NEZHA>> Graceful::START")
 		singleton.RecordTransferHourlyUsage()
 		log.Println("NEZHA>> Graceful::END")
-		srv.Shutdown(c)
+		if err := srv.Shutdown(c); err != nil {
+			log.Printf("NEZHA>> ERROR: srv.Shutdown: %v", err)
+		}
 		return nil
 	}); err != nil {
 		log.Printf("NEZHA>> ERROR: %v", err)
@@ -94,7 +96,7 @@ func dispatchReportInfoTask() {
 		if server == nil || server.TaskStream == nil {
 			continue
 		}
-		server.TaskStream.Send(&proto.Task{
+		_ = server.TaskStream.Send(&proto.Task{
 			Type: model.TaskTypeReportHostInfo,
 			Data: "",
 		})

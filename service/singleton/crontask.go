@@ -52,14 +52,14 @@ func loadCronTasks() {
 			if _, ok := notificationMsgMap[crons[i].NotificationTag]; !ok {
 				notificationTagList = append(notificationTagList, crons[i].NotificationTag)
 				notificationMsgMap[crons[i].NotificationTag] = bytes.NewBufferString("")
-				notificationMsgMap[crons[i].NotificationTag].WriteString("调度失败的计划任务：[")
+				_, _ = notificationMsgMap[crons[i].NotificationTag].WriteString("调度失败的计划任务：[")
 			}
-			notificationMsgMap[crons[i].NotificationTag].WriteString(fmt.Sprintf("%d,", crons[i].ID))
+			_, _ = notificationMsgMap[crons[i].NotificationTag].WriteString(fmt.Sprintf("%d,", crons[i].ID))
 		}
 	}
 	// 向注册错误的计划任务所在通知组发送通知
 	for _, tag := range notificationTagList {
-		notificationMsgMap[tag].WriteString("] 这些任务将无法正常执行,请进入后点重新修改保存。")
+		_, _ = notificationMsgMap[tag].WriteString("] 这些任务将无法正常执行,请进入后点重新修改保存。")
 		SendNotification(tag, notificationMsgMap[tag].String(), nil)
 	}
 	Cron.Start()
@@ -99,7 +99,7 @@ func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 			defer ServerLock.RUnlock()
 			if s, ok := ServerList[triggerServer[0]]; ok {
 				if s.TaskStream != nil {
-					s.TaskStream.Send(&pb.Task{
+					_ = s.TaskStream.Send(&pb.Task{
 						Id:   cr.ID,
 						Data: cr.Command,
 						Type: model.TaskTypeCommand,
@@ -107,7 +107,7 @@ func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 				} else {
 					// 保存当前服务器状态信息
 					curServer := model.Server{}
-					copier.Copy(&curServer, s)
+					_ = copier.Copy(&curServer, s)
 					SendNotification(cr.NotificationTag, fmt.Sprintf("[任务失败] %s，服务器 %s 离线，无法执行。", cr.Name, s.Name), nil, &curServer)
 				}
 			}
@@ -124,7 +124,7 @@ func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 				continue
 			}
 			if s.TaskStream != nil {
-				s.TaskStream.Send(&pb.Task{
+				_ = s.TaskStream.Send(&pb.Task{
 					Id:   cr.ID,
 					Data: cr.Command,
 					Type: model.TaskTypeCommand,
@@ -132,7 +132,7 @@ func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 			} else {
 				// 保存当前服务器状态信息
 				curServer := model.Server{}
-				copier.Copy(&curServer, s)
+				_ = copier.Copy(&curServer, s)
 				SendNotification(cr.NotificationTag, fmt.Sprintf("[任务失败] %s，服务器 %s 离线，无法执行。", cr.Name, s.Name), nil, &curServer)
 			}
 		}

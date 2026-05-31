@@ -103,7 +103,7 @@ func (r *AlertRule) Check(points [][]interface{}) (int, bool) {
 			// 常规报警
 			total := 0.0
 			fail := 0.0
-			num := int(r.Rules[i].Duration)
+			num := int(r.Rules[i].Duration) // #nosec G115 -- duration is seconds, safely within int range
 			if num > maxNum {
 				maxNum = num
 			}

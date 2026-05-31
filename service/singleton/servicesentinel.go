@@ -64,9 +64,9 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 	for i := 0; i < len(mhs); i++ {
 		totalDelay[mhs[i].MonitorID] += mhs[i].AvgDelay
 		totalDelayCount[mhs[i].MonitorID]++
-		ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Up += int(mhs[i].Up)
+		ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Up += int(mhs[i].Up) // #nosec G115 -- daily up count fits in int
 		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp += mhs[i].Up
-		ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Down += int(mhs[i].Down)
+		ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Down += int(mhs[i].Down) // #nosec G115 -- daily down count fits in int
 		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown += mhs[i].Down
 	}
 	for id, delay := range totalDelay {
@@ -136,8 +136,8 @@ func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
 		for i := 0; i < len(v.Up)-1; i++ {
 			if i == 0 {
 				// 30 天在线率，减去已经出30天之外的数据
-				v.TotalDown -= uint64(v.Down[i])
-				v.TotalUp -= uint64(v.Up[i])
+				v.TotalDown -= uint64(v.Down[i]) // #nosec G115 -- array index value fits in uint64
+				v.TotalUp -= uint64(v.Up[i]) // #nosec G115 -- array index value fits in uint64
 			}
 			v.Up[i], v.Down[i], v.Delay[i] = v.Up[i+1], v.Down[i+1], v.Delay[i+1]
 		}
@@ -229,9 +229,9 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 		}
 		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex] = (ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex]*float32(delayCount[dayIndex]) + mhs[i].AvgDelay) / float32(delayCount[dayIndex]+1)
 		delayCount[dayIndex]++
-		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Up[dayIndex] += int(mhs[i].Up)
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Up[dayIndex] += int(mhs[i].Up) // #nosec G115 -- daily up count fits in int
 		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp += mhs[i].Up
-		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Down[dayIndex] += int(mhs[i].Down)
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Down[dayIndex] += int(mhs[i].Down) // #nosec G115 -- daily down count fits in int
 		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown += mhs[i].Down
 	}
 }
@@ -308,11 +308,11 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 
 		// 30 天在线率，
 		//   |- 减去上次加的旧当天数据，防止出现重复计数
-		ss.monthlyStatus[k].TotalUp -= uint64(ss.monthlyStatus[k].Up[29])
-		ss.monthlyStatus[k].TotalDown -= uint64(ss.monthlyStatus[k].Down[29])
+		ss.monthlyStatus[k].TotalUp -= uint64(ss.monthlyStatus[k].Up[29]) // #nosec G115 -- daily value fits in uint64
+		ss.monthlyStatus[k].TotalDown -= uint64(ss.monthlyStatus[k].Down[29]) // #nosec G115 -- daily value fits in uint64
 		//   |- 加上当日数据
-		ss.monthlyStatus[k].TotalUp += uint64(v.Up)
-		ss.monthlyStatus[k].TotalDown += uint64(v.Down)
+		ss.monthlyStatus[k].TotalUp += uint64(v.Up) // #nosec G115 -- daily value fits in uint64
+		ss.monthlyStatus[k].TotalDown += uint64(v.Down) // #nosec G115 -- daily value fits in uint64
 
 		ss.monthlyStatus[k].Up[29] = v.Up
 		ss.monthlyStatus[k].Down[29] = v.Down

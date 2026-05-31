@@ -46,7 +46,8 @@ func InitDNSServers(s string) {
 func (provider *Provider) UpdateDomain(ctx context.Context) {
 	provider.ctx = ctx
 	for _, domain := range provider.DDNSProfile.Domains {
-		for retries := 0; retries < int(provider.DDNSProfile.MaxRetries); retries++ {
+		maxRetries := int(provider.DDNSProfile.MaxRetries) // #nosec G115 -- max retries is a small positive integer
+		for retries := 0; retries < maxRetries; retries++ {
 			provider.domain = domain
 			log.Printf("NEZHA>> 正在尝试更新域名(%s)DDNS(%d/%d)", provider.domain, retries+1, provider.DDNSProfile.MaxRetries)
 			if err := provider.updateDomain(); err != nil {

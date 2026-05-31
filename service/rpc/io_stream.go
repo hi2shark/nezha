@@ -54,10 +54,10 @@ func (s *NezhaHandler) CloseStream(streamId string) error {
 
 	if ctx, ok := s.ioStreams[streamId]; ok {
 		if ctx.userIo != nil {
-			ctx.userIo.Close()
+			_ = ctx.userIo.Close()
 		}
 		if ctx.agentIo != nil {
-			ctx.agentIo.Close()
+			_ = ctx.agentIo.Close()
 		}
 		delete(s.ioStreams, streamId)
 	}

@@ -31,6 +31,7 @@ type _httpTransport struct {
 }
 
 func httpTransport(conf _httpTransport) *http.Transport {
+	// #nosec G402 -- InsecureSkipVerify is intentionally configurable for self-signed certificate scenarios
 	return &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.SkipVerifySSL},
 		Proxy:           http.ProxyFromEnvironment,

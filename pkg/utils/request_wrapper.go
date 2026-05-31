@@ -50,7 +50,7 @@ func (rw *RequestWrapper) Write(p []byte) (int, error) {
 }
 
 func (rw *RequestWrapper) Close() error {
-	rw.req.Body.Close()
-	rw.writer.Close()
+	_ = rw.req.Body.Close()
+	_ = rw.writer.Close()
 	return nil
 }

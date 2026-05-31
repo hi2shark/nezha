@@ -293,14 +293,14 @@ func natGateway(c *gin.Context) {
 	server := singleton.ServerList[natConfig.ServerID]
 	singleton.ServerLock.RUnlock()
 	if server == nil || server.TaskStream == nil {
-		c.Writer.WriteString("server not found or not connected")
+		_, _ = c.Writer.WriteString("server not found or not connected")
 		c.Abort()
 		return
 	}
 
 	streamId, err := uuid.GenerateUUID()
 	if err != nil {
-		c.Writer.WriteString(fmt.Sprintf("stream id error: %v", err))
+		_, _ = c.Writer.WriteString(fmt.Sprintf("stream id error: %v", err))
 		c.Abort()
 		return
 	}
@@ -313,7 +313,7 @@ func natGateway(c *gin.Context) {
 		Host:     natConfig.Host,
 	})
 	if err != nil {
-		c.Writer.WriteString(fmt.Sprintf("task data error: %v", err))
+		_, _ = c.Writer.WriteString(fmt.Sprintf("task data error: %v", err))
 		c.Abort()
 		return
 	}
@@ -322,24 +322,24 @@ func natGateway(c *gin.Context) {
 		Type: model.TaskTypeNAT,
 		Data: string(taskData),
 	}); err != nil {
-		c.Writer.WriteString(fmt.Sprintf("send task error: %v", err))
+		_, _ = c.Writer.WriteString(fmt.Sprintf("send task error: %v", err))
 		c.Abort()
 		return
 	}
 
 	w, err := utils.NewRequestWrapper(c.Request, c.Writer)
 	if err != nil {
-		c.Writer.WriteString(fmt.Sprintf("request wrapper error: %v", err))
+		_, _ = c.Writer.WriteString(fmt.Sprintf("request wrapper error: %v", err))
 		c.Abort()
 		return
 	}
 
 	if err := rpc.NezhaHandlerSingleton.UserConnected(streamId, w); err != nil {
-		c.Writer.WriteString(fmt.Sprintf("user connected error: %v", err))
+		_, _ = c.Writer.WriteString(fmt.Sprintf("user connected error: %v", err))
 		c.Abort()
 		return
 	}
 
-	rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
+	_ = rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
 	c.Abort()
 }
