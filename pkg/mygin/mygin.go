@@ -25,7 +25,17 @@ var adminPage = map[string]bool{
 func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {
 	data["MatchedPath"] = c.MustGet("MatchedPath")
 	data["Version"] = singleton.Version
-	data["Conf"] = singleton.Conf
+	_, isAuthorized := c.Get(model.CtxKeyAuthorizedUser)
+	if isAuthorized {
+		data["Conf"] = singleton.Conf
+	} else {
+		data["Conf"] = model.PublicConfig{
+			Site:                            singleton.Conf.Site,
+			Language:                        singleton.Conf.Language,
+			MaxTCPPingValue:                 singleton.Conf.MaxTCPPingValue,
+			DisableSwitchTemplateInFrontend: singleton.Conf.DisableSwitchTemplateInFrontend,
+		}
+	}
 	data["Themes"] = model.Themes
 	data["CustomCode"] = singleton.Conf.Site.CustomCode
 	data["CustomCodeDashboard"] = singleton.Conf.Site.CustomCodeDashboard

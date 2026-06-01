@@ -33,8 +33,10 @@ func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
 	cr.Use(mygin.Authorize(mygin.AuthorizeOption{}))
 	cr.Use(mygin.PreferredTheme)
+	cr.Use(natGateway)
 	cr.POST("/view-password", cp.issueViewPassword)
 	cr.GET("/terminal/:id", cp.terminal)
+	cr.GET("/file/:id", cp.fm)
 	cr.Use(mygin.ValidateViewPassword(mygin.ValidateViewPasswordOption{
 		IsPage:        true,
 		AbortWhenFail: true,
@@ -47,7 +49,6 @@ func (cp *commonPage) serve() {
 	cr.GET("/ws", cp.ws)
 	cr.POST("/terminal", cp.createTerminal)
 	cr.GET("/file", cp.createFM)
-	cr.GET("/file/:id", cp.fm)
 }
 
 type viewPasswordForm struct {
@@ -75,7 +76,7 @@ func (p *commonPage) issueViewPassword(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	c.SetCookie(singleton.Conf.Site.CookieName+"-vp", string(hash), 60*60*24, "", "", false, false)
+	c.SetCookie(singleton.Conf.Site.CookieName+"-vp", string(hash), 60*60*24, "", "", false, true)
 	c.Redirect(http.StatusFound, c.Request.Referer())
 }
 
@@ -263,6 +264,9 @@ func (cp *commonPage) home(c *gin.Context) {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  32768,
 	WriteBufferSize: 32768,
+	CheckOrigin: func(r *http.Request) bool {
+		return false
+	},
 }
 
 type Data struct {
@@ -306,6 +310,16 @@ func (cp *commonPage) ws(c *gin.Context) {
 }
 
 func (cp *commonPage) terminal(c *gin.Context) {
+	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "无权访问",
+			Msg:   "用户未登录",
+			Link:  "/",
+			Btn:   "返回首页",
+		}, true)
+		return
+	}
 	streamId := c.Param("id")
 	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
@@ -436,6 +450,16 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 }
 
 func (cp *commonPage) fm(c *gin.Context) {
+	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "无权访问",
+			Msg:   "用户未登录",
+			Link:  "/",
+			Btn:   "返回首页",
+		}, true)
+		return
+	}
 	streamId := c.Param("id")
 	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{

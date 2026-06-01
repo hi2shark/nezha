@@ -50,20 +50,31 @@ const (
 	ConfigCoverIgnoreAll
 )
 
+// SiteConfig 站点前端配置
+type SiteConfig struct {
+	Brand               string // 站点名称
+	CookieName          string // 浏览器 Cookie 名称
+	Theme               string
+	DashboardTheme      string
+	CustomCode          string
+	CustomCodeDashboard string
+	ViewPassword        string // 前台查看密码
+}
+
+// PublicConfig 仅包含未登录页面所需的公开配置字段
+type PublicConfig struct {
+	Site                            SiteConfig
+	Language                        string
+	MaxTCPPingValue                 int32
+	DisableSwitchTemplateInFrontend bool
+}
+
 // Config 站点配置
 type Config struct {
 	Debug    bool   // debug模式开关
 	Language string // 系统语言，默认 zh-CN
-	Site     struct {
-		Brand               string // 站点名称
-		CookieName          string // 浏览器 Cookie 名称
-		Theme               string
-		DashboardTheme      string
-		CustomCode          string
-		CustomCodeDashboard string
-		ViewPassword        string // 前台查看密码
-	}
-	Oauth2 struct {
+	Site     SiteConfig
+	Oauth2   struct {
 		Type            string
 		Admin           string // 管理员用户名列表
 		AdminGroups     string // 管理员用户组列表

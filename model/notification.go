@@ -128,7 +128,11 @@ func (ns *NotificationServerBundle) Send(message string) error {
 		return err
 	}
 
-	req, err := http.NewRequest(reqMethod, ns.reqURL(message), strings.NewReader(reqBody))
+	reqURL := ns.reqURL(message)
+	if err := utils.CheckURLForSSRF(reqURL); err != nil {
+		return err
+	}
+	req, err := http.NewRequest(reqMethod, reqURL, strings.NewReader(reqBody))
 	if err != nil {
 		return err
 	}

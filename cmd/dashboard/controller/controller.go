@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/bytefmt"
-	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	stdpprof "net/http/pprof"
 	"github.com/hashicorp/go-uuid"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
@@ -31,9 +31,26 @@ func ServeWeb(port uint) *http.Server {
 	r := gin.Default()
 	if singleton.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
-		pprof.Register(r)
+		debug := r.Group("/debug")
+		debug.Use(mygin.Authorize(mygin.AuthorizeOption{
+			MemberOnly: true,
+			IsPage:     false,
+			Msg:        "无权访问",
+		}))
+		pprofGroup := debug.Group("/pprof")
+		pprofGroup.GET("/", gin.WrapF(stdpprof.Index))
+		pprofGroup.GET("/cmdline", gin.WrapF(stdpprof.Cmdline))
+		pprofGroup.GET("/profile", gin.WrapF(stdpprof.Profile))
+		pprofGroup.GET("/symbol", gin.WrapF(stdpprof.Symbol))
+		pprofGroup.POST("/symbol", gin.WrapF(stdpprof.Symbol))
+		pprofGroup.GET("/trace", gin.WrapF(stdpprof.Trace))
+		pprofGroup.GET("/allocs", gin.WrapH(stdpprof.Handler("allocs")))
+		pprofGroup.GET("/block", gin.WrapH(stdpprof.Handler("block")))
+		pprofGroup.GET("/goroutine", gin.WrapH(stdpprof.Handler("goroutine")))
+		pprofGroup.GET("/heap", gin.WrapH(stdpprof.Handler("heap")))
+		pprofGroup.GET("/mutex", gin.WrapH(stdpprof.Handler("mutex")))
+		pprofGroup.GET("/threadcreate", gin.WrapH(stdpprof.Handler("threadcreate")))
 	}
-	r.Use(natGateway)
 	tmpl := template.New("").Funcs(funcMap)
 	var err error
 	tmpl, err = tmpl.ParseFS(resource.TemplateFS, "template/**/*.html")
@@ -286,6 +303,10 @@ var funcMap = template.FuncMap{
 func natGateway(c *gin.Context) {
 	natConfig := singleton.GetNATConfigByDomain(c.Request.Host)
 	if natConfig == nil {
+		return
+	}
+	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"code": 403, "message": "无权访问"})
 		return
 	}
 

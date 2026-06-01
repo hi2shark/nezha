@@ -88,6 +88,10 @@ func (provider *Provider) prepareRequest(ctx context.Context) (*http.Request, er
 		return nil, err
 	}
 
+	if err := utils.CheckURLForSSRF(req.URL.String()); err != nil {
+		return nil, err
+	}
+
 	provider.setContentType(req)
 
 	for k, v := range headers {
