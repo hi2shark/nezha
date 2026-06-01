@@ -142,7 +142,7 @@ func (oa *oauth2controller) login(c *gin.Context) {
 	state, stateKey := randomString[:16], randomString[16:]
 	singleton.Cache.Set(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, stateKey), state, cache.DefaultExpiration)
 	url := oa.getCommonOauth2Config(c).AuthCodeURL(state, oauth2.AccessTypeOnline)
-	c.SetCookie(singleton.Conf.Site.CookieName+"-sk", stateKey, 60*5, "", "", false, false)
+	c.SetCookie(singleton.Conf.Site.CookieName+"-sk", stateKey, 60*5, "", "", false, true)
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/redirect", mygin.CommonEnvironment(c, gin.H{
 		"URL": url,
 	}))
@@ -276,7 +276,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	}
 	user.TokenExpired = time.Now().AddDate(0, 2, 0)
 	singleton.DB.Save(&user)
-	c.SetCookie(singleton.Conf.Site.CookieName, user.Token, 60*60*24, "", "", false, false)
+	c.SetCookie(singleton.Conf.Site.CookieName, user.Token, 60*60*24, "", "", false, true)
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/redirect", mygin.CommonEnvironment(c, gin.H{
 		"URL": "/",
 	}))
