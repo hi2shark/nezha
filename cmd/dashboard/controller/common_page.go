@@ -264,9 +264,6 @@ func (cp *commonPage) home(c *gin.Context) {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  32768,
 	WriteBufferSize: 32768,
-	CheckOrigin: func(r *http.Request) bool {
-		return false
-	},
 }
 
 type Data struct {
